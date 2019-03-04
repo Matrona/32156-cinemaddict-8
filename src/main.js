@@ -22,14 +22,10 @@ const showCards = (num, container) => {
   for (let i = 1; i <= num; i++) {
     container.insertAdjacentHTML(`beforeend`, createCard(createRandomCard()));
 
-    const containerWrapExtra = container.closest(`.films-list--extra`);
-
-    if (containerWrapExtra) {
-      const cardsExtra = containerWrapExtra.querySelectorAll(`.film-card`);
-      cardsExtra.forEach((cardExtra) => {
-        cardExtra.classList.add(`film-card--no-controls`);
-      });
-    }
+    const cardsExtra = document.querySelectorAll(`.films-list--extra .film-card`);
+    cardsExtra.forEach((cardExtra) => {
+      cardExtra.classList.add(`film-card--no-controls`);
+    });
   }
 };
 
