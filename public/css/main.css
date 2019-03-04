@@ -231,6 +231,10 @@ a:hover {
   transition: none;
 }
 
+.film-card--no-controls .film-card__controls {
+  display: none;
+}
+
 .film-card__description {
   font-size: --font-size-smaller;
   padding-right: 30px;
