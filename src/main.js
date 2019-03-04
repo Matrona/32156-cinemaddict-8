@@ -1,3 +1,5 @@
+import {random} from './utils.js';
+import createRandomCard from './data.js';
 import createFilterElement from './filter.js';
 import createCard from './card.js';
 
@@ -18,11 +20,14 @@ const showCards = (num, container) => {
   container.innerHTML = ``;
 
   for (let i = 1; i <= num; i++) {
-    container.insertAdjacentHTML(`beforeend`, createCard());
+    container.insertAdjacentHTML(`beforeend`, createCard(createRandomCard()));
+
+    const cardsExtra = document.querySelectorAll(`.films-list--extra .film-card`);
+    cardsExtra.forEach((cardExtra) => {
+      cardExtra.classList.add(`film-card--no-controls`);
+    });
   }
 };
-
-const random = (min, max) => Math.floor(Math.random() * (max - min)) + min;
 
 // Отрисовываем все фильтры
 
