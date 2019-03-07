@@ -16,10 +16,8 @@ export default () => ({
   title: randomItem(titles),
   rating: randomFloat(6, 10),
   year: random(2016, 2018),
-  duration: {
-    hours: random(1, 3),
-    minutes: random(0, 59)
-  },
+  durationHours: random(1, 3),
+  durationMinutes: random(0, 59),
   genre: randomItem(genres),
   picture: randomItem(images),
   description: createRandomDescription(descriptions),
