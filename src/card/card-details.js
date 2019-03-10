@@ -1,7 +1,8 @@
-import {createElement} from '../utils.js';
+import {Component} from '../component.js';
 
-export class CardDetails {
+export class CardDetails extends Component {
   constructor(data) {
+    super();
     this._title = data.title;
     this._rating = data.rating;
     this._picture = data.picture;
@@ -12,22 +13,16 @@ export class CardDetails {
     this._description = data.description;
     this._comments = data.comments;
 
-    this._element = null;
     this._onDetailsClose = null;
+    this._onDetailsCloseClick = this._onDetailsCloseClick.bind(this);
   }
 
   _onDetailsCloseClick() {
-    if (typeof this._onDetailsClose === `function`) {
-      this._onDetailsClose();
-    }
+    return typeof this._onDetailsClose === `function` && this._onDetailsClose();
   }
 
   set onDetailsClose(fn) {
     this._onDetailsClose = fn;
-  }
-
-  get element() {
-    return this._element;
   }
 
   get template() {
@@ -197,22 +192,11 @@ export class CardDetails {
     `.trim();
   }
 
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
+  createListeners() {
+    this._element.querySelector(`.film-details__close-btn`).addEventListener(`click`, this._onDetailsCloseClick);
   }
 
-  unrender() {
-    this.unbind();
-    this._element = null;
-  }
-
-  bind() {
-    this._element.querySelector(`.film-details__close-btn`).addEventListener(`click`, this._onDetailsCloseClick.bind(this));
-  }
-
-  unbind() {
-    this._element.querySelector(`.film-details__close-btn`).removeEventListener(`click`, this._onDetailsCloseClick.bind(this));
+  removeListeners() {
+    this._element.querySelector(`.film-details__close-btn`).removeEventListener(`click`, this._onDetailsCloseClick);
   }
 }
