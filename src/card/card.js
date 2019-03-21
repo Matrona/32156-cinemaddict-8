@@ -1,7 +1,8 @@
-import {createElement} from '../utils.js';
+import {Component} from '../component.js';
 
-export class Card {
+export class Card extends Component {
   constructor(data) {
+    super();
     this._title = data.title;
     this._rating = data.rating;
     this._picture = data.picture;
@@ -12,8 +13,8 @@ export class Card {
     this._description = data.description;
     this._comments = data.comments;
 
-    this._element = null;
     this._onDetails = null;
+    this._onDetailsButtonClick = this._onDetailsButtonClick.bind(this);
   }
 
   _createDurationMinutes() {
@@ -24,17 +25,11 @@ export class Card {
   }
 
   _onDetailsButtonClick() {
-    if (typeof this._onDetails === `function`) {
-      this._onDetails();
-    }
+    return typeof this._onDetails === `function` && this._onDetails();
   }
 
   set onDetails(fn) {
     this._onDetails = fn;
-  }
-
-  get element() {
-    return this._element;
   }
 
   get template() {
@@ -60,22 +55,11 @@ export class Card {
     `.trim();
   }
 
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
+  createListeners() {
+    this._element.querySelector(`.film-card__comments`).addEventListener(`click`, this._onDetailsButtonClick);
   }
 
-  unrender() {
-    this.unbind();
-    this._element = null;
-  }
-
-  bind() {
-    this._element.querySelector(`.film-card__comments`).addEventListener(`click`, this._onDetailsButtonClick.bind(this));
-  }
-
-  unbind() {
-    this._element.querySelector(`.film-card__comments`).removeEventListener(`click`, this._onDetailsButtonClick.bind(this));
+  removeListeners() {
+    this._element.querySelector(`.film-card__comments`).removeEventListener(`click`, this._onDetailsButtonClick);
   }
 }
