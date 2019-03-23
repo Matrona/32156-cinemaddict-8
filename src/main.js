@@ -28,6 +28,7 @@ const showCards = (num, container) => {
 
   for (let i = 1; i <= num; i++) {
     cardComponentData[i] = createRandomCard();
+    cardComponentData[i].number = i;
     cardComponent[i] = new Card(cardComponentData[i]);
     cardComponentDetails[i] = new CardDetails(cardComponentData[i]);
 
@@ -35,8 +36,13 @@ const showCards = (num, container) => {
       document.body.appendChild(cardComponentDetails[i].render());
     };
 
-    cardComponentDetails[i].onDetailsClose = () => {
+    cardComponentDetails[i].onDetailsClose = (newObject) => {
+      cardComponentData[i].commentsCount = newObject.commentsCount;
+      cardComponentData[i].comment = newObject.comment;
+      cardComponentData[i].userRating = newObject.userRating;
+
       document.body.removeChild(document.querySelector(`.film-details`));
+      cardComponent[i].update(cardComponentData[i]);
       cardComponentDetails[i].unrender();
     };
 
