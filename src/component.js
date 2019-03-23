@@ -7,6 +7,7 @@ export class Component {
     }
 
     this._element = null;
+    this._state = {};
   }
 
   get element() {
@@ -25,6 +26,7 @@ export class Component {
 
   unrender() {
     this.removeListeners();
+    this._element.remove();
     this._element = null;
   }
 

@@ -1,4 +1,5 @@
-import {random, randomItem, randomFloat} from './utils.js';
+import {random, randomItem, randomFloat, randomDate} from './utils.js';
+import moment from 'moment';
 
 const titles = [`Three Billboards Outside Ebbing, Missouri `, `The Revenant`, `Inception`, `Catch Me If You Can`, `Shutter Island`, `Wonder`, `Avatar`, `Blade Runner 2049`, `Bohemian Rhapsody`, `Ready Player One`, `Upgrade`, `Hacksaw Ridge`, `Sully`, `The Martian`, `Interstellar`];
 
@@ -12,14 +13,27 @@ const createRandomDescription = (elements) => {
   return [...elements].sort(() => 0.5 - Math.random()).slice(0, random(1, 3)).join(` `);
 };
 
+const createComments = () => {
+  const comment = {
+    author: `Tim Macoveev`,
+    date: moment().fromNow(),
+    text: `So long-long story, boring!`,
+    emoji: `😴`
+  };
+  return Array(random(0, 8)).fill(comment);
+};
+
+const createRandomReleaseDate = () => randomDate(new Date(2008, 0, 1), new Date());
+
 export default () => ({
+  number: null,
   title: randomItem(titles),
   rating: randomFloat(6, 10),
-  year: random(2016, 2018),
-  durationHours: random(1, 3),
-  durationMinutes: random(0, 59),
+  userRating: `5`,
+  runtime: random(60, 150) * 60000,
+  releaseDate: createRandomReleaseDate(),
   genre: randomItem(genres),
   picture: randomItem(images),
   description: createRandomDescription(descriptions),
-  comments: random(0, 20)
+  comment: createComments()
 });

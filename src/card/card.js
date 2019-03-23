@@ -1,27 +1,34 @@
 import {Component} from '../component.js';
+import moment from 'moment';
+
 
 export class Card extends Component {
   constructor(data) {
     super();
     this._title = data.title;
     this._rating = data.rating;
+    this._userRating = data.userRating;
     this._picture = data.picture;
-    this._year = data.year;
-    this._durationHours = data.durationHours;
-    this._durationMinutes = data.durationMinutes;
+    this._releaseDate = data.releaseDate;
+    this._runtime = data.runtime;
     this._genre = data.genre;
     this._description = data.description;
-    this._comments = data.comments;
+    this._commentsCount = data.comment.length;
+    this._comment = data.comment;
 
     this._onDetails = null;
     this._onDetailsButtonClick = this._onDetailsButtonClick.bind(this);
   }
 
   _createDurationMinutes() {
-    if (this._durationMinutes <= 5) {
+    if (moment.duration(this._runtime).minutes() <= 5) {
       return false;
     }
     return true;
+  }
+
+  _updateCommentsCount() {
+    this._element.querySelector(`.film-card__comments`).innerHTML = `${this._commentsCount} comments`;
   }
 
   _onDetailsButtonClick() {
@@ -38,13 +45,13 @@ export class Card extends Component {
         <h3 class="film-card__title">${this._title}</h3>
         <p class="film-card__rating">${this._rating}</p>
         <p class="film-card__info">
-          <span class="film-card__year">${this._year}</span>
-          <span class="film-card__duration">${this._durationHours}h&nbsp;${this._createDurationMinutes() ? `${this._durationMinutes}m` : ``}</span>
+          <span class="film-card__year">${moment(this._releaseDate).year()}</span>
+          <span class="film-card__duration">${moment.duration(this._runtime).hours()}h&nbsp;${this._createDurationMinutes() ? `${moment.duration(this._runtime).minutes()}m` : ``}</span>
           <span class="film-card__genre">${this._genre}</span>
         </p>
         <img src="./images/posters/${this._picture}" alt="" class="film-card__poster">
         <p class="film-card__description">${this._description}</p>
-        <button class="film-card__comments">${this._comments} comments</button>
+        <button class="film-card__comments">${this._commentsCount} comments</button>
 
         <form class="film-card__controls">
           <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist"><!--Add to watchlist--> WL</button>
@@ -61,5 +68,12 @@ export class Card extends Component {
 
   removeListeners() {
     this._element.querySelector(`.film-card__comments`).removeEventListener(`click`, this._onDetailsButtonClick);
+  }
+
+  update(data) {
+    this._commentsCount = data.commentsCount;
+    this._comment = data.comment;
+    this._userRating = data.userRating;
+    this._updateCommentsCount();
   }
 }
