@@ -1,4 +1,4 @@
-import {random, randomItem, randomFloat, randomDate} from './utils.js';
+import {getRandom, getRandomBoolean, getRandomItem, getRandomFloat, getRandomDate} from './utils.js';
 import moment from 'moment';
 
 const titles = [`Three Billboards Outside Ebbing, Missouri `, `The Revenant`, `Inception`, `Catch Me If You Can`, `Shutter Island`, `Wonder`, `Avatar`, `Blade Runner 2049`, `Bohemian Rhapsody`, `Ready Player One`, `Upgrade`, `Hacksaw Ridge`, `Sully`, `The Martian`, `Interstellar`];
@@ -9,8 +9,12 @@ const descriptions = [`Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
 
 const genres = [`Comedy`, `Fantasy`, `Horror`, `Adventure`, `Action`, `Thriller`, `Drama`, `Mystery`, `Crime`, `Animation`];
 
+const createRandomGenres = (elements) => {
+  return [...elements].sort(() => 0.5 - Math.random()).slice(0, getRandom(1, 4));
+};
+
 const createRandomDescription = (elements) => {
-  return [...elements].sort(() => 0.5 - Math.random()).slice(0, random(1, 3)).join(` `);
+  return [...elements].sort(() => 0.5 - Math.random()).slice(0, getRandom(1, 3)).join(` `);
 };
 
 const createComments = () => {
@@ -20,20 +24,22 @@ const createComments = () => {
     text: `So long-long story, boring!`,
     emoji: `😴`
   };
-  return Array(random(0, 8)).fill(comment);
+  return Array(getRandom(0, 8)).fill(comment);
 };
 
-const createRandomReleaseDate = () => randomDate(new Date(2008, 0, 1), new Date());
+const getRandomReleaseDate = () => getRandomDate(new Date(2008, 0, 1), new Date());
 
 export default () => ({
   number: null,
-  title: randomItem(titles),
-  rating: randomFloat(6, 10),
+  title: getRandomItem(titles),
+  rating: getRandomFloat(6, 10),
   userRating: `5`,
-  runtime: random(60, 150) * 60000,
-  releaseDate: createRandomReleaseDate(),
-  genre: randomItem(genres),
-  picture: randomItem(images),
+  runtime: getRandom(60, 150) * 60000,
+  releaseDate: getRandomReleaseDate(),
+  genres: createRandomGenres(genres),
+  picture: getRandomItem(images),
   description: createRandomDescription(descriptions),
-  comment: createComments()
+  comment: createComments(),
+  inWatchList: getRandomBoolean(),
+  isWatched: getRandomBoolean()
 });
