@@ -10,17 +10,23 @@ export class CardDetails extends Component {
     this._userRating = data.userRating;
     this._picture = data.picture;
     this._runtime = data.runtime;
-    this._genre = data.genre;
+    this._genres = data.genres;
     this._description = data.description;
-    this._commentsCount = data.comment.length;
     this._comment = data.comment;
+    this._commentsCount = data.comment.length;
     this._releaseDate = data.releaseDate;
+
+    this._inWatchList = data.inWatchList;
+    this._isWatched = data.isWatched;
 
     this._onDetailsClose = null;
     this._onDetailsCloseClick = this._onDetailsCloseClick.bind(this);
     this._onChangeEmoji = this._onChangeEmoji.bind(this);
     this._onAddComment = this._onAddComment.bind(this);
     this._onChangeUserRating = this._onChangeUserRating.bind(this);
+    this._onAddToWatchListClick = this._onAddToWatchListClick.bind(this);
+    this._onMarkAsWatchedClick = this._onMarkAsWatchedClick.bind(this);
+    this._onDetailsWatchedResetClick = this._onDetailsWatchedResetClick.bind(this);
   }
 
   _createComment() {
@@ -38,11 +44,19 @@ export class CardDetails extends Component {
     `.trim()).join(``);
   }
 
+  _createGenres() {
+    return this._genres.map((genre) => `
+    <span class="film-details__genre">${genre}</span>
+    `.trim()).join(``);
+  }
+
   _processForm(formData) {
     const entry = {
       commentsCount: this._commentsCount,
       comment: this._comment,
-      userRating: this._userRating
+      userRating: this._userRating,
+      inWatchList: this._inWatchList,
+      isWatched: this._isWatched
     };
 
     const taskEditMapper = CardDetails.createMapper(entry);
@@ -92,6 +106,30 @@ export class CardDetails extends Component {
       this._onDetailsClose(newData);
     }
     return this.update(newData);
+  }
+
+  _onAddToWatchListClick() {
+    this._inWatchList = !this._inWatchList;
+  }
+
+  _onMarkAsWatchedClick() {
+    const detailsWatched = document.querySelector(`.film-details__watched-status`);
+    this._isWatched = !this._isWatched;
+    if (this._isWatched) {
+      detailsWatched.classList.add(`film-details__watched-status--active`);
+    } else {
+      detailsWatched.classList.remove(`film-details__watched-status--active`);
+    }
+  }
+
+  _onDetailsWatchedResetClick(evt) {
+    evt.preventDefault();
+    const detailsWatched = document.querySelector(`.film-details__watched-status`);
+    if (this._isWatched) {
+      this._isWatched = !this._isWatched;
+      detailsWatched.classList.remove(`film-details__watched-status--active`);
+      document.getElementById(`watched`).checked = false;
+    }
   }
 
   _partialUpdate() {
@@ -156,10 +194,7 @@ export class CardDetails extends Component {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Genres</td>
-                  <td class="film-details__cell">
-                    <span class="film-details__genre">Animation</span>
-                    <span class="film-details__genre">Action</span>
-                    <span class="film-details__genre">Adventure</span></td>
+                  <td class="film-details__cell">${this._createGenres(this._genres)}</td>
                 </tr>
               </table>
 
@@ -168,14 +203,14 @@ export class CardDetails extends Component {
           </div>
 
           <section class="film-details__controls">
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
-            <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist-${this._number}" name="watchlist" ${this._inWatchList ? `checked` : ``}>
+            <label for="watchlist-${this._number}" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" checked>
-            <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched-${this._number}" name="watched" ${this._isWatched ? `checked` : ``}>
+            <label for="watched-${this._number}" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite">
-            <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite-${this._number}" name="favorite">
+            <label for="favorite-${this._number}" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
           </section>
 
           <section class="film-details__comments-wrap">
@@ -209,7 +244,7 @@ export class CardDetails extends Component {
 
           <section class="film-details__user-rating-wrap">
             <div class="film-details__user-rating-controls">
-              <span class="film-details__watched-status film-details__watched-status--active">Already watched</span>
+              <span class="film-details__watched-status ${this._isWatched ? `film-details__watched-status--active` : ``}">Already watched</span>
               <button class="film-details__watched-reset" type="button">undo</button>
             </div>
 
@@ -261,6 +296,9 @@ export class CardDetails extends Component {
 
   createListeners() {
     this._element.querySelector(`.film-details__close-btn`).addEventListener(`click`, this._onDetailsCloseClick);
+    this._element.querySelector(`.film-details__control-label--watchlist`).addEventListener(`click`, this._onAddToWatchListClick);
+    this._element.querySelector(`.film-details__control-label--watched`).addEventListener(`click`, this._onMarkAsWatchedClick);
+    this._element.querySelector(`.film-details__watched-reset`).addEventListener(`click`, this._onDetailsWatchedResetClick);
     [...this._element.querySelectorAll(`.film-details__emoji-item`)].map((item) => {
       item.addEventListener(`click`, this._onChangeEmoji);
     });
@@ -272,6 +310,9 @@ export class CardDetails extends Component {
 
   removeListeners() {
     this._element.querySelector(`.film-details__close-btn`).removeEventListener(`click`, this._onDetailsCloseClick);
+    this._element.querySelector(`.film-details__control-label--watchlist`).removeEventListener(`click`, this._onAddToWatchListClick);
+    this._element.querySelector(`.film-details__control-label--watched`).removeEventListener(`click`, this._onMarkAsWatchedClick);
+    this._element.querySelector(`.film-details__watched-reset`).removeEventListener(`click`, this._onDetailsWatchedResetClick);
     [...this._element.querySelectorAll(`.film-details__emoji-item`)].map((item) => {
       item.removeEventListener(`click`, this._onChangeEmoji);
     });
@@ -285,6 +326,8 @@ export class CardDetails extends Component {
     this._commentsCount = data.commentsCount;
     this._comment = data.comment;
     this._userRating = data.userRating;
+    this._inWatchList = data.inWatchList;
+    this._isWatched = data.isWatched;
   }
 
   static createMapper(target) {
@@ -297,6 +340,12 @@ export class CardDetails extends Component {
       },
       userRating: (value) => {
         target.userRating = value;
+      },
+      isWatched: (value) => {
+        target.isWatched = value;
+      },
+      inWatchList: (value) => {
+        target.inWatchList = value;
       }
     };
   }

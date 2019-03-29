@@ -1,7 +1,6 @@
 import {Component} from '../component.js';
 import moment from 'moment';
 
-
 export class Card extends Component {
   constructor(data) {
     super();
@@ -11,13 +10,20 @@ export class Card extends Component {
     this._picture = data.picture;
     this._releaseDate = data.releaseDate;
     this._runtime = data.runtime;
-    this._genre = data.genre;
+    this._genre = data.genres[0];
     this._description = data.description;
-    this._commentsCount = data.comment.length;
     this._comment = data.comment;
+    this._commentsCount = data.comment.length;
+
+    this._inWatchList = data.inWatchList;
+    this._isWatched = data.isWatched;
 
     this._onDetails = null;
+    this._onAddToWatchList = null;
+    this._onMarkAsWatched = null;
     this._onDetailsButtonClick = this._onDetailsButtonClick.bind(this);
+    this._onAddToWatchListClick = this._onAddToWatchListClick.bind(this);
+    this._onMarkAsWatchedClick = this._onMarkAsWatchedClick.bind(this);
   }
 
   _createDurationMinutes() {
@@ -25,6 +31,24 @@ export class Card extends Component {
       return false;
     }
     return true;
+  }
+
+  _processForm(formData) {
+    const entry = {
+      commentsCount: this._commentsCount,
+      comment: this._comment,
+      inWatchList: this._inWatchList,
+      isWatched: this._isWatched
+    };
+
+    const cardMapper = Card.createMapper(entry);
+    for (const pair of formData.entries()) {
+      const [property, value] = pair;
+      if (cardMapper[property]) {
+        cardMapper[property](value);
+      }
+    }
+    return entry;
   }
 
   _updateCommentsCount() {
@@ -35,8 +59,38 @@ export class Card extends Component {
     return typeof this._onDetails === `function` && this._onDetails();
   }
 
+  _onAddToWatchListClick(evt) {
+    evt.preventDefault();
+    this._inWatchList = !this._inWatchList;
+    const formData = new FormData(this._element.querySelector(`.film-card__controls`));
+    const newData = this._processForm(formData);
+    if (typeof this._onAddToWatchList === `function`) {
+      this._onAddToWatchList(newData);
+    }
+    return this.update(newData);
+  }
+
+  _onMarkAsWatchedClick(evt) {
+    evt.preventDefault();
+    this._isWatched = !this._isWatched;
+    const formData = new FormData(this._element.querySelector(`.film-card__controls`));
+    const newData = this._processForm(formData);
+    if (typeof this._onMarkAsWatched === `function`) {
+      this._onMarkAsWatched(newData);
+    }
+    return this.update(newData);
+  }
+
   set onDetails(fn) {
     this._onDetails = fn;
+  }
+
+  set onAddToWatchList(fn) {
+    this._onAddToWatchList = fn;
+  }
+
+  set onMarkAsWatched(fn) {
+    this._onMarkAsWatched = fn;
   }
 
   get template() {
@@ -64,16 +118,36 @@ export class Card extends Component {
 
   createListeners() {
     this._element.querySelector(`.film-card__comments`).addEventListener(`click`, this._onDetailsButtonClick);
+    this._element.querySelector(`.film-card__controls-item--add-to-watchlist`).addEventListener(`click`, this._onAddToWatchListClick);
+    this._element.querySelector(`.film-card__controls-item--mark-as-watched`).addEventListener(`click`, this._onMarkAsWatchedClick);
   }
 
   removeListeners() {
     this._element.querySelector(`.film-card__comments`).removeEventListener(`click`, this._onDetailsButtonClick);
+    this._element.querySelector(`.film-card__controls-item--add-to-watchlist`).removeEventListener(`click`, this._onAddToWatchListClick);
+    this._element.querySelector(`.film-card__controls-item--mark-as-watched`).removeEventListener(`click`, this._onMarkAsWatchedClick);
   }
 
   update(data) {
     this._commentsCount = data.commentsCount;
     this._comment = data.comment;
     this._userRating = data.userRating;
+    this._inWatchList = data.inWatchList;
+    this._isWatched = data.isWatched;
     this._updateCommentsCount();
+  }
+
+  static createMapper(target) {
+    return {
+      commentsCount: (value) => {
+        target.commentsCount = value;
+      },
+      isWatched: (value) => {
+        target.isWatched = value;
+      },
+      inWatchList: (value) => {
+        target.inWatchList = value;
+      }
+    };
   }
 }
