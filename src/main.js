@@ -1,52 +1,61 @@
-import {random} from './utils.js';
+import {createDataArray} from './utils.js';
 import createRandomCard from './data.js';
-import createFilterElement from './filter.js';
+import createFilter from './data-filter.js';
+import {statisticChart} from './create-statistic.js';
 import {Card} from './card/card.js';
 import {CardDetails} from './card/card-details.js';
-
-// Filter
-
-const filterContainer = document.querySelector(`.main-navigation`);
-const filterElementsArray = [
-  [`All movies`, true],
-  [`Watchlist`],
-  [`History`],
-  [`Favorites`]
-];
+import {Filter} from './filter/filter.js';
 
 // Card
 
+const mainCardsContainer = document.querySelector(`.films`);
 const cardContainer = document.querySelector(`.films-list .films-list__container`);
 const cardContainersExtra = document.querySelectorAll(`.films-list--extra .films-list__container`);
 
-const showCards = (num, container) => {
+const cardsData = createDataArray(7, createRandomCard);
+const cardsTopData = createDataArray(2, createRandomCard);
+const cardsMostCommentedData = createDataArray(2, createRandomCard);
+
+const showCards = (data, container) => {
   container.innerHTML = ``;
+  let i = 0;
 
-  const cardComponentData = [];
-  const cardComponent = [];
-  const cardComponentDetails = [];
+  for (const cardComponentData of data) {
+    i += 1;
+    cardComponentData.number = i;
 
-  for (let i = 1; i <= num; i++) {
-    cardComponentData[i] = createRandomCard();
-    cardComponentData[i].number = i;
-    cardComponent[i] = new Card(cardComponentData[i]);
-    cardComponentDetails[i] = new CardDetails(cardComponentData[i]);
+    const cardComponent = new Card(cardComponentData);
+    const cardComponentDetails = new CardDetails(cardComponentData);
 
-    cardComponent[i].onDetails = () => {
-      document.body.appendChild(cardComponentDetails[i].render());
+    cardComponent.onDetails = () => {
+      document.body.appendChild(cardComponentDetails.render());
     };
 
-    cardComponentDetails[i].onDetailsClose = (newObject) => {
-      cardComponentData[i].commentsCount = newObject.commentsCount;
-      cardComponentData[i].comment = newObject.comment;
-      cardComponentData[i].userRating = newObject.userRating;
+    cardComponentDetails.onDetailsClose = (newObject) => {
+      cardComponentData.commentsCount = newObject.commentsCount;
+      cardComponentData.comment = newObject.comment;
+      cardComponentData.userRating = newObject.userRating;
+      cardComponentData.inWatchList = newObject.inWatchList;
+      cardComponentData.isWatched = newObject.isWatched;
 
       document.body.removeChild(document.querySelector(`.film-details`));
-      cardComponent[i].update(cardComponentData[i]);
-      cardComponentDetails[i].unrender();
+      cardComponent.update(cardComponentData);
+      cardComponentDetails.unrender();
     };
 
-    container.appendChild(cardComponent[i].render());
+    cardComponent.onAddToWatchList = (newObject) => {
+      cardComponentData.commentsCount = newObject.commentsCount;
+      cardComponentData.inWatchList = newObject.inWatchList;
+      cardComponentDetails.update(cardComponentData);
+    };
+
+    cardComponent.onMarkAsWatched = (newObject) => {
+      cardComponentData.commentsCount = newObject.commentsCount;
+      cardComponentData.isWatched = newObject.isWatched;
+      cardComponentDetails.update(cardComponentData);
+    };
+
+    container.appendChild(cardComponent.render());
 
     const cardsExtra = document.querySelectorAll(`.films-list--extra .film-card`);
     cardsExtra.forEach((cardExtra) => {
@@ -55,35 +64,75 @@ const showCards = (num, container) => {
   }
 };
 
-// Отрисовываем все фильтры
+// Filter
+
+const filterContainer = document.querySelector(`.main-navigation`);
+const statisticBtn = filterContainer.querySelector(`.main-navigation__item--additional`);
+
+const toggleNavItemActive = (evt) => {
+  const filterLinks = document.querySelectorAll(`.main-navigation__item`);
+  filterLinks.forEach((linkItem) => {
+    linkItem.classList.remove(`main-navigation__item--active`);
+  });
+  evt.target.classList.add(`main-navigation__item--active`);
+};
+
+const filterData = (data, filterName) => {
+  switch (filterName) {
+    case `all`:
+      return data;
+    case `watchlist`:
+      return data.filter((film) => film.inWatchList);
+    case `history`:
+      return data.filter((film) => film.isWatched);
+    // case `favorites`:
+    //   return data;
+    default:
+      return data;
+  }
+};
 
 const showFilter = (container) => {
-  const filterElements = filterElementsArray.map((item) => createFilterElement(item[0], random(0, 15), item[1]));
-  container.insertAdjacentHTML(`afterbegin`, filterElements.join(``));
+  const filterComponentData = createFilter();
+
+  return filterComponentData.map((item) => {
+    const filterComponent = new Filter(item);
+    container.insertBefore(filterComponent.render(), statisticBtn);
+
+    filterComponent.onFilter = (evt) => {
+      const filterName = evt.target.id;
+      const filteredCards = filterData(cardsData, filterName);
+      showCards(filteredCards, cardContainer);
+      toggleNavItemActive(evt);
+
+      statistic.classList.add(`visually-hidden`);
+      mainCardsContainer.classList.remove(`visually-hidden`);
+    };
+  });
 };
+
+// statistic
+
+const statistic = document.querySelector(`.statistic`);
+
+const onStatsBtnClick = (evt) => {
+  evt.preventDefault();
+  toggleNavItemActive(evt);
+  statistic.classList.remove(`visually-hidden`);
+  mainCardsContainer.classList.add(`visually-hidden`);
+
+  statisticChart(cardsData);
+};
+
+statisticBtn.addEventListener(`click`, onStatsBtnClick);
+
+// filter
 
 showFilter(filterContainer);
 
-// Добавляем каждому фильтру обработчик события click
+// Cards
 
-const filterLinks = document.querySelectorAll(`.main-navigation__item`);
+showCards(cardsData, cardContainer);
 
-filterLinks.forEach((link) => {
-  link.addEventListener(`click`, () => {
-    showCards(random(0, 15), cardContainer);
-
-    filterLinks.forEach((linkItem) => {
-      linkItem.classList.remove(`main-navigation__item--active`);
-    });
-
-    link.classList.add(`main-navigation__item--active`);
-  });
-});
-
-// Card
-
-showCards(7, cardContainer);
-
-cardContainersExtra.forEach((container) => {
-  showCards(2, container);
-});
+showCards(cardsTopData, cardContainersExtra[0]);
+showCards(cardsMostCommentedData, cardContainersExtra[1]);
