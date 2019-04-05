@@ -22,7 +22,7 @@ export const statisticChart = (data) => {
 
   const isWatchedGenresSumOrder = isWatchedGenresSum.sort((a, b) => b[1] - a[1]);
 
-  const isWatchedRuntimeSum = isWatchedFilms.reduce((runtimeSum, film) => runtimeSum + film.runtime, 0);
+  const isWatchedRuntimeSum = isWatchedFilms.reduce((runtimeSum, film) => runtimeSum + (film.runtime * 60000), 0);
 
   const chartLabels = isWatchedGenresSumOrder.map((item) => item[0]);
   const chartData = isWatchedGenresSumOrder.map((item) => item[1]);
