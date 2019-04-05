@@ -7,16 +7,17 @@ export class Card extends Component {
     this._title = data.title;
     this._rating = data.rating;
     this._userRating = data.userRating;
-    this._picture = data.picture;
+    this._picture = data.posterUrl;
     this._releaseDate = data.releaseDate;
     this._runtime = data.runtime;
-    this._genre = data.genres[0];
+    this._genres = data.genres;
     this._description = data.description;
-    this._comment = data.comment;
-    this._commentsCount = data.comment.length;
+    this._comment = data.comments;
+    this._commentsCount = data.comments.length;
 
     this._inWatchList = data.inWatchList;
     this._isWatched = data.isWatched;
+    this._isFavorite = data.isFavorite;
 
     this._onDetails = null;
     this._onAddToWatchList = null;
@@ -27,7 +28,7 @@ export class Card extends Component {
   }
 
   _createDurationMinutes() {
-    if (moment.duration(this._runtime).minutes() <= 5) {
+    if (moment.duration(this._runtime * 60000).minutes() <= 5) {
       return false;
     }
     return true;
@@ -100,10 +101,10 @@ export class Card extends Component {
         <p class="film-card__rating">${this._rating}</p>
         <p class="film-card__info">
           <span class="film-card__year">${moment(this._releaseDate).year()}</span>
-          <span class="film-card__duration">${moment.duration(this._runtime).hours()}h&nbsp;${this._createDurationMinutes() ? `${moment.duration(this._runtime).minutes()}m` : ``}</span>
-          <span class="film-card__genre">${this._genre}</span>
+          <span class="film-card__duration">${moment.duration(this._runtime * 60000).hours()}h&nbsp;${this._createDurationMinutes() ? `${moment.duration(this._runtime * 60000).minutes()}m` : ``}</span>
+          <span class="film-card__genre">${this._genres.length ? this._genres[0] : `—`}</span>
         </p>
-        <img src="./images/posters/${this._picture}" alt="" class="film-card__poster">
+        <img src="./${this._picture}" alt="" class="film-card__poster">
         <p class="film-card__description">${this._description}</p>
         <button class="film-card__comments">${this._commentsCount} comments</button>
 
@@ -129,8 +130,8 @@ export class Card extends Component {
   }
 
   update(data) {
-    this._commentsCount = data.commentsCount;
-    this._comment = data.comment;
+    this._commentsCount = data.comments.length;
+    this._comment = data.comments;
     this._userRating = data.userRating;
     this._inWatchList = data.inWatchList;
     this._isWatched = data.isWatched;
